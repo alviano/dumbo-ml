@@ -1,13 +1,17 @@
 [tool.poetry]
 name = "dumbo-ml"
-version = "0.1.0"
+version = "0.1.1"
 description = ""
 authors = ["Mario Alviano <mario.alviano@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.10"
 
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0.0"
+coverage = "^7.4.1"
 
 [build-system]
 requires = ["poetry-core"]
