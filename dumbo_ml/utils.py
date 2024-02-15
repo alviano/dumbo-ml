@@ -34,8 +34,8 @@ def run_in_any_gpu(smi):
                             log.info(f"Try with GPU {device} {usage}")
                             result = fun()
                             done = True
-            except Exception as e:
-                log.info(f"Oops!", e)
+            except tf.errors.OpError as e:
+                log.error(f"Oops!", e)
             if not done:
                 log.info(f"Retry in {delay:.1f} seconds...")
                 time.sleep(delay)
