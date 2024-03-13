@@ -35,7 +35,7 @@ def run_in_any_gpu(smi):
                         with tf.Graph().as_default():
                             with tf.device(f"/GPU:{device}"):
                                 log.info(f"Try with GPU {device} {usage}")
-                                result = fun()
+                                result = fun(*args, **kwargs)
                                 done = True
                 except tf.errors.OpError as e:
                     log.error(f"Oops!", e)
