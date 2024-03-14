@@ -1,7 +1,9 @@
 import functools
 import importlib
 import logging
+import os
 import random
+import signal
 import time
 
 try:
@@ -16,6 +18,13 @@ def run_in_any_gpu(smi):
     def decorator(fun):
         @functools.wraps(fun)
         def wrapper(*args, **kwargs):
+            def signal_handler(the_signal, frame):
+                smi.smi_shutdown()
+                signal.signal(signal.SIGINT, signal.default_int_handler)
+                os.kill(os.getpid(), signal.SIGINT)
+
+            signal.signal(signal.SIGINT, signal_handler)
+
             try:
                 smi.smi_initialize()
                 devices = [device for device in range(smi.smi_get_device_count())]
@@ -45,10 +54,6 @@ def run_in_any_gpu(smi):
                         log.info(f"Retry in {delay:.1f} seconds...")
                         time.sleep(delay)
                         delay = min(300, delay * 2)
-            except Exception as e:
-                log.error(f"Oops!", e)
-                smi.smi_shutdown()
-                raise e
             finally:
                 smi.smi_shutdown()
             return result
@@ -61,3 +66,9 @@ def run_in_any_amd_gpu(fun):
         return run_in_any_gpu(importlib.import_module("pyrsmi.rocml", package="pyrsmi"))(fun)
     except ModuleNotFoundError:
         exit("Module 'pyrsmi' is required but not installed")
+
+
+def foo():
+    os.setpgrp()
+
+
