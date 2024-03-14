@@ -23,6 +23,8 @@ def run_in_any_gpu(smi):
             def signal_handler(the_signal, frame):
                 smi.smi_shutdown()
                 graph.__exit__(None, None, None)
+                if device:
+                    device.__exit__(None, None, None)
                 signal.signal(signal.SIGINT, signal.default_int_handler)
                 os.kill(os.getpid(), signal.SIGINT)
 
@@ -47,7 +49,8 @@ def run_in_any_gpu(smi):
                                 log.info(f"Skip GPU {device} {usage}")
                                 continue
                             with graph:
-                                with tf.device(f"/GPU:{device}"):
+                                device = tf.device(f"/GPU:{device}")
+                                with device:
                                     log.info(f"Try with GPU {device} {usage}")
                                     result = fun(*args, **kwargs)
                                     done = True
