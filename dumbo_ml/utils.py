@@ -45,6 +45,10 @@ def run_in_any_gpu(smi):
                         log.info(f"Retry in {delay:.1f} seconds...")
                         time.sleep(delay)
                         delay = min(300, delay * 2)
+            except Exception as e:
+                log.error(f"Oops!", e)
+                smi.smi_shutdown()
+                raise e
             finally:
                 smi.smi_shutdown()
             return result
