@@ -18,8 +18,11 @@ def run_in_any_gpu(smi):
     def decorator(fun):
         @functools.wraps(fun)
         def wrapper(*args, **kwargs):
+            graph = tf.Graph().as_default()
+
             def signal_handler(the_signal, frame):
                 smi.smi_shutdown()
+                graph.__exit__(None, None, None)
                 signal.signal(signal.SIGINT, signal.default_int_handler)
                 os.kill(os.getpid(), signal.SIGINT)
 
@@ -33,6 +36,7 @@ def run_in_any_gpu(smi):
 
                 delay = 1.0
                 done = False
+
                 while not done:
                     try:
                         for device in devices:
@@ -42,7 +46,7 @@ def run_in_any_gpu(smi):
                             if utilization > 10 or memory > 10:
                                 log.info(f"Skip GPU {device} {usage}")
                                 continue
-                            with tf.Graph().as_default():
+                            with graph:
                                 with tf.device(f"/GPU:{device}"):
                                     log.info(f"Try with GPU {device} {usage}")
                                     result = fun(*args, **kwargs)
